@@ -1,16 +1,19 @@
 <template>
   <div id="app">
     <Timer/>
+    <Buttons/>
   </div>
 </template>
 
 <script lang="ts">
 import {Component, Vue} from 'vue-property-decorator';
 import Timer from './components/Timer.vue';
+import Buttons from './components/Buttons.vue';
 
 @Component({
   components: {
-    Timer
+    Timer,
+    Buttons
   },
 })
 export default class App extends Vue {}
@@ -41,5 +44,9 @@ body {
   box-sizing: content-box;
   background-color: rgba(255,255,255, 0.5);
   color: black;
+  font-size: 25vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
