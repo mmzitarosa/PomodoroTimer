@@ -1,4 +1,4 @@
-import {BREAK_TIME, WORK_TIME} from "@/constant";
+import {BREAK_TIME, CONSECUTIVE_TOMATOES, LONG_BREAK_TIME, WORK_TIME} from "@/constant";
 
 export default class TimerService {
 
@@ -70,7 +70,6 @@ export default class TimerService {
         return this.tomatoCounter;
     }
 
-
     private calculateNextAlarm(time: number): number | undefined {
         if (this.nextAlarm && this.active) {
             this.toNextAlarm = TimerService.normalizeTime(this.nextAlarm - time);
@@ -82,6 +81,8 @@ export default class TimerService {
         if (this.toNextAlarm === undefined || force) {
             if (this.isWorkTime())
                 this.toNextAlarm = WORK_TIME;
+            else if (this.tomatoCounter % CONSECUTIVE_TOMATOES === 0)
+                this.toNextAlarm = LONG_BREAK_TIME;
             else
                 this.toNextAlarm = BREAK_TIME;
         }
@@ -89,15 +90,14 @@ export default class TimerService {
     }
 
     private checkTomato(time: number): void {
-        if (this.toNextAlarm && this.toNextAlarm < 0) {
-            this.stop();
+        if (this.toNextAlarm && this.toNextAlarm <= 0 && this.nextAlarm) {
 
             this.workTime = !this.workTime;
 
             // Get default value
             this.timeToNextAlarm(true)
 
-            this.start();
+            this.nextAlarm = this.nextAlarm + this.toNextAlarm
 
             if (this.workTime)
                 this.tomatoCounter++;
