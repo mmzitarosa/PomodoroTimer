@@ -1,5 +1,4 @@
-const WORK_TIME = 25 * 60;
-const BREAK_TIME = 5 * 60;
+import {BREAK_TIME, WORK_TIME} from "@/constant";
 
 export default class TimerService {
 
@@ -8,12 +7,12 @@ export default class TimerService {
     private active: boolean;
     private workTime?: boolean;
     private nextAlarm?: number;
-    private secondsToNextAlarm?: number;
-
-    // private timer?: NodeJS.Timeout;
+    private toNextAlarm?: number;
+    private tomatoCounter: number;
 
     private constructor() {
         this.active = false;
+        this.tomatoCounter = 0;
         this.reset();
     }
 
@@ -24,30 +23,28 @@ export default class TimerService {
     }
 
     public start(): void {
-        this.active = true;
-
         if (this.workTime === undefined) {
             this.workTime = true;
-            this.nextAlarm = TimerService.seconds() + WORK_TIME;
-        } else if (this.secondsToNextAlarm) {
-            this.nextAlarm = TimerService.seconds() + this.secondsToNextAlarm;
+            this.nextAlarm = new Date().getTime() + WORK_TIME;
+            this.tomatoCounter++;
+        } else if (this.toNextAlarm) {
+            this.nextAlarm = new Date().getTime() + this.toNextAlarm;
         } else {
             return;
         }
-
-        // this.startService();
+        this.active = true;
     }
 
     public stop(): void {
         this.active = false;
-        // this.stopService();
     }
 
     public reset(): void {
         this.active = false;
+        this.tomatoCounter = 0;
         this.workTime = undefined;
         this.nextAlarm = undefined;
-        this.secondsToNextAlarm = undefined;
+        this.toNextAlarm = undefined;
     }
 
     public isActive(): boolean {
@@ -58,33 +55,57 @@ export default class TimerService {
         return this.workTime !== false;
     }
 
-    public getTimeToNextAlarm(time: number): number | undefined {
-        if (this.nextAlarm && this.isActive())
-            this.secondsToNextAlarm = this.nextAlarm - TimerService.seconds(time);
-        return this.secondsToNextAlarm;
+    public getTimeToNextAlarm(time: number): number {
+        // Calculate difference
+        this.calculateNextAlarm(time);
+
+        // Check if the next alarm time is below 0
+        this.checkTomato(time);
+
+        // Get time to next alarm or default value
+        return this.timeToNextAlarm();
     }
 
-    //
-    // private startService(): void {
-    //     this.timer = setInterval(() => {
-    //         if (this.nextAlarm)
-    //             this.timeToNextAlarm = this.nextAlarm - new Date().getTime();
-    //         else
-    //             this.stopService();
-    //         console.log("Tick: " + this.nextAlarm + " - " + new Date().getTime() + " = " + this.timeToNextAlarm);
-    //
-    //     }, 1000);
-    // }
+    public getTomatoCounter() {
+        return this.tomatoCounter;
+    }
 
-    // private stopService(): void {
-    //     if (this.timer)
-    //         clearInterval(this.timer);
-    // }
 
-    private static seconds(time?: number): number {
-        if (!time)
-            time = new Date().getTime();
-        return Math.round(time / 1000);
+    private calculateNextAlarm(time: number): number | undefined {
+        if (this.nextAlarm && this.active) {
+            this.toNextAlarm = TimerService.normalizeTime(this.nextAlarm - time);
+        }
+        return this.toNextAlarm;
+    }
+
+    private timeToNextAlarm(force?: boolean): number {
+        if (this.toNextAlarm === undefined || force) {
+            if (this.isWorkTime())
+                this.toNextAlarm = WORK_TIME;
+            else
+                this.toNextAlarm = BREAK_TIME;
+        }
+        return this.toNextAlarm;
+    }
+
+    private checkTomato(time: number): void {
+        if (this.toNextAlarm && this.toNextAlarm < 0) {
+            this.stop();
+
+            this.workTime = !this.workTime;
+
+            // Get default value
+            this.timeToNextAlarm(true)
+
+            this.start();
+
+            if (this.workTime)
+                this.tomatoCounter++;
+        }
+    }
+
+    private static normalizeTime(time: number): number {
+        return Math.floor(time / 1000) * 1000;
     }
 
 }

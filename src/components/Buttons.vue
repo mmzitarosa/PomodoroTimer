@@ -1,8 +1,11 @@
 <template>
   <div class="buttons">
-    <button type="button" v-on:click="start" v-if="!isActive">Start</button>
-    <button type="button" v-on:click="stop" v-else>Stop</button>
-    <button type="button" v-on:click="reset">Reset</button>
+    {{ tomatoCounter }}
+    <span class="timer-buttons">
+      <a v-on:click="start" v-if="!isActive" style="color: green">Start</a>
+      <a type="button" v-on:click="stop" v-else style="color: darkred">Stop</a>
+      <a type="button" v-on:click="reset">Reset</a>
+    </span>
   </div>
 </template>
 
@@ -15,6 +18,9 @@ export default Vue.extend({
     timerService: TimerService.getInstance()
   }),
   computed: {
+    tomatoCounter(): number {
+      return this.timerService.getTomatoCounter();
+    },
     isActive(): boolean {
       return this.timerService.isActive();
     }
@@ -34,13 +40,18 @@ export default Vue.extend({
 </script>
 
 <style>
-
-.timer {
+.buttons {
+  width: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  font-size: 25vw;
+  justify-content: space-between;
 }
 
+.timer-buttons {
+  text-align: right;
+}
+
+.buttons a {
+  margin-left: 16px;
+  cursor: pointer;
+}
 </style>

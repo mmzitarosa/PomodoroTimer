@@ -1,7 +1,9 @@
 <template>
   <div id="app">
-    <Timer/>
-    <Buttons/>
+    <div id="content">
+      <Timer id="timer"/>
+      <Buttons/>
+    </div>
   </div>
 </template>
 
@@ -16,7 +18,8 @@ import Buttons from './components/Buttons.vue';
     Buttons
   },
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+}
 </script>
 
 <style>
@@ -44,9 +47,12 @@ body {
   box-sizing: content-box;
   background-color: rgba(255,255,255, 0.5);
   color: black;
-  font-size: 25vw;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#timer {
+  font-size: 25vw;
 }
 </style>
