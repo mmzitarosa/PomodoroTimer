@@ -1,4 +1,4 @@
-const SECOND: number = 1000;
+const SECOND: number = 1;
 const MINUTE: number = 60 * SECOND;
 
 export const WORK_TIME: number = 25 * MINUTE;

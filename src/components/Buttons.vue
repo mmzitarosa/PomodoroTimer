@@ -8,44 +8,26 @@
 
 <script lang="ts">
 import {Vue} from 'vue-property-decorator';
-import {WORK_TIME} from "@/constant";
-import {State} from "@/store";
+import TimerService from "@/services/TimerService";
 
 export default Vue.extend({
   data: () => ({
+    timerService: TimerService.getInstance()
   }),
   computed: {
     isActive(): boolean {
-      return this.$store.getters.isActive;
-    },
-    nextAlarmTime(): number | undefined {
-      return this.$store.getters.nextAlarmTime;
-    },
-    lastTime(): number | undefined {
-      return this.$store.getters.lastTime;
-    },
-    lastDifference(): number | undefined {
-      if (this.nextAlarmTime && this.lastTime)
-        return this.nextAlarmTime - this.lastTime;
-      return undefined;
+      return this.timerService.isActive();
     }
   },
   methods: {
     start() {
-      this.$store.commit(
-          "startTimer",
-          {
-            nextAlarmTime: new Date().getTime() + (this.lastDifference ? this.lastDifference : WORK_TIME),
-            state: State.WORK
-          }
-      );
+      this.timerService.start();
     },
     stop() {
-      this.lastTime = new Date().getTime();
-      this.$store.commit("stopTimer");
+      this.timerService.stop();
     },
     reset() {
-      this.$store.commit("resetTimer");
+      this.timerService.reset();
     },
   }
 });

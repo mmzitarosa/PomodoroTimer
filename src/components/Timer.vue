@@ -7,78 +7,48 @@
 <script lang="ts">
 import {Vue} from 'vue-property-decorator';
 import {BREAK_TIME, WORK_TIME} from "@/constant";
-import {State} from "@/store";
+import TimerService from "@/services/TimerService";
 
 export default Vue.extend({
   data: () => ({
-    nowTime: new Date().getTime(),
-    lastDifference: <number | undefined>undefined
+    timerService: TimerService.getInstance(),
+    now: <number>new Date().getTime(),
+    // lastUpdate: <number | undefined>undefined,
+    // nextAlarm: <number | undefined>undefined
   }),
   created() {
-    this.start();
-  },
-  methods: {
-    start() {
-      setInterval(() => {
-        this.nowTime = new Date().getTime();
-      }, 1000);
-    },
-    startBreak() {
-      this.$store.commit(
-          "startTimer",
-          {
-            nextAlarmTime: new Date().getTime() + BREAK_TIME,
-            state: State.BREAK
-          }
-      );
-    },
-    startWork() {
-      this.$store.commit(
-          "startTimer",
-          {
-            nextAlarmTime: new Date().getTime() + WORK_TIME,
-            state: State.WORK
-          }
-      );
-      this.$store.commit("incrementTomatoes");
-    }
+    setInterval(() => {
+      this.now = new Date().getTime();
+    }, 1000)
   },
   computed: {
     isActive(): boolean {
-      return this.$store.getters.isActive;
+      return this.timerService.isActive();
     },
     isWorkTime(): boolean {
-      return this.$store.getters.state != State.BREAK;
+      return this.timerService.isWorkTime();
     },
-    nextAlarmTime(): number | undefined {
-      return this.$store.getters.nextAlarmTime;
-    },
-    lastTime(): number | undefined {
-      return this.$store.getters.lastTime;
+    timeToNextAlarm(): number | undefined {
+      // if (!this.lastUpdate || this.now !== this.lastUpdate) {
+      //   this.nextAlarm = this.timerService.getTimeToNextAlarm();
+      //   this.lastUpdate = this.now;
+      // }
+      // return this.nextAlarm;
+      return this.timerService.getTimeToNextAlarm(this.now);
     },
     difference(): number {
-      if (this.isActive && this.nextAlarmTime) {
-        this.lastDifference = this.nextAlarmTime - this.nowTime;
-      } else if (!this.lastDifference || !this.nextAlarmTime) {
-        this.lastDifference = WORK_TIME;
+      if (this.timeToNextAlarm) {
+        return this.timeToNextAlarm;
+      } else if (this.isWorkTime) {
+        return WORK_TIME;
       }
-
-      if (this.lastDifference <= 0) {
-        if (this.isWorkTime) {
-          this.startBreak();
-          this.lastDifference = BREAK_TIME;
-        } else {
-          this.startWork();
-          this.lastDifference = WORK_TIME;
-        }
-      }
-      return this.lastDifference;
+      return BREAK_TIME;
     },
     countdown() {
-      let days = Math.floor(this.difference / (1000 * 60 * 60 * 24));
-      let hours = Math.floor((this.difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      let minutes: string | number = Math.floor((this.difference % (1000 * 60 * 60)) / (1000 * 60));
-      let seconds: string | number = Math.floor((this.difference % (1000 * 60)) / 1000);
+      let days = Math.floor(this.difference / (60 * 60 * 24));
+      let hours = Math.floor((this.difference % (60 * 60 * 24)) / (60 * 60));
+      let minutes: string | number = Math.floor((this.difference % (60 * 60)) / (60));
+      let seconds: string | number = Math.floor((this.difference % (60)));
 
       minutes = (minutes < 10 ? '0' : '') + minutes;
       seconds = (seconds < 10 ? '0' : '') + seconds;
@@ -89,8 +59,3 @@ export default Vue.extend({
 
 });
 </script>
-
-<style>
-
-
-</style>
