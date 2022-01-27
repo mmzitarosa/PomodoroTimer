@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div id="content">
+    <div id="content" ref="content">
       <Timer id="timer"/>
       <Buttons/>
     </div>
@@ -17,6 +17,11 @@ import Buttons from './components/Buttons.vue';
     Timer,
     Buttons
   },
+  mounted() {
+    setTimeout(() => {
+      (this.$refs.content as HTMLElement).style.visibility = "visible";
+    }, 1000)
+  }
 })
 export default class App extends Vue {
 }
@@ -45,13 +50,15 @@ body {
   height: 100%;
   border-radius: 15px;
   box-sizing: content-box;
-  background-color: rgba(255,255,255, 0.5);
+  background-color: rgba(255, 255, 255, 0.5);
   color: black;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
+#content {
+  visibility: hidden;
+}
 #timer {
   font-size: 25vw;
 }
